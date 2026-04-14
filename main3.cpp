@@ -1,220 +1,136 @@
 #include <iostream>
-#include <cstring>
+#include <string>
+#include <vector>
 #include <iomanip>
 
 using namespace std;
 
-const int TONG_SINH_VIEN_TOI_DA = 100;
-const int DO_DAI_TEN_TOI_DA = 50;
-const int DO_DAI_KHOA_HOC_TOI_DA = 50;
-
-struct SinhVien {
-    int maSo;
-    char hoTen[DO_DAI_TEN_TOI_DA];
+class Nguoi {
+protected:
+    string hoTen;
     int tuoi;
-    char khoaHoc[DO_DAI_KHOA_HOC_TOI_DA];
+
+public:
+    Nguoi() : hoTen(""), tuoi(0) {}
+
+    virtual void nhapThongTin() {
+        cout << "Nhap Ho Ten: ";
+        getline(cin, hoTen);
+        cout << "Nhap Tuoi: ";
+        cin >> tuoi;
+        while (cin.fail() || tuoi <= 0 || tuoi > 100) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Tuoi khong hop le. Nhap lai: ";
+            cin >> tuoi;
+        }
+        cin.ignore();
+    }
+
+    virtual void hienThi() const {
+        cout << left << setw(25) << hoTen << " | " << setw(5) << tuoi;
+    }
+
+    string getHoTen() const { return hoTen; }
+    virtual ~Nguoi() {}
 };
-SinhVien danhSachSinhVien[TONG_SINH_VIEN_TOI_DA];
-int soLuongHienTai = 0;
 
-void inCanGiua(const string &vanBan, int doRong) {
-    int khoangTrong = (doRong - vanBan.length()) / 2;
-    for (int i = 0; i < khoangTrong; ++i) {
-        cout << " ";
+class SinhVien : public Nguoi {
+protected:
+    string maSo;
+    string khoaHoc;
+
+public:
+    SinhVien() : Nguoi(), maSo(""), khoaHoc("") {}
+
+    void nhapThongTin() override {
+        cout << "Nhap Ma So SV: ";
+        getline(cin, maSo);
+        Nguoi::nhapThongTin();
+        cout << "Nhap Khoa hoc: ";
+        getline(cin, khoaHoc);
     }
-    cout << vanBan << endl;
+
+    void hienThi() const override {
+        cout << left << setw(15) << maSo << " | ";
+        Nguoi::hienThi();
+        cout << " | " << setw(15) << khoaHoc << endl;
+    }
+
+    string getMaSo() const { return maSo; }
+};
+void themMoi(vector<SinhVien*>& danhSach) {
+    SinhVien* sv = new SinhVien();
+    sv->nhapThongTin();
+    danhSach.push_back(sv);
+    cout << "\n=> Them sinh vien thanh cong!\n";
 }
 
-bool laMaSoDuyNhat(int maSo) {
-    for (int i = 0; i < soLuongHienTai; i++) {
-        if (danhSachSinhVien[i].maSo == maSo) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void themSinhVien() {
-    if (soLuongHienTai >= TONG_SINH_VIEN_TOI_DA) {
-        inCanGiua("Danh sach sinh vien da day.", 100);
+void hienThiTatCa(const vector<SinhVien*>& danhSach) {
+    if (danhSach.empty()) {
+        cout << "\n=> Danh sach trong!\n";
         return;
     }
-    int maSo;
-    inCanGiua("Nhap Ma SV: ", 100);
-    cin >> maSo;
-    while (!laMaSoDuyNhat(maSo)) {
-        inCanGiua("Ma SV da ton tai. Vui long nhap lai: ", 100);
-        cin >> maSo;
-    }
-    danhSachSinhVien[soLuongHienTai].maSo = maSo;
-
-    cin.ignore();
-
-    inCanGiua("Nhap Ho Ten: ", 100);
-    cin.getline(danhSachSinhVien[soLuongHienTai].hoTen, DO_DAI_TEN_TOI_DA);
-
-    inCanGiua("Nhap Tuoi: ", 100);
-    cin >> danhSachSinhVien[soLuongHienTai].tuoi;
-
-    while (cin.fail() || danhSachSinhVien[soLuongHienTai].tuoi <= 0 || danhSachSinhVien[soLuongHienTai].tuoi > 100) {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        inCanGiua("Tuoi khong hop le. Vui long nhap lai (1-100): ", 100);
-        cin >> danhSachSinhVien[soLuongHienTai].tuoi;
-    }
-    cin.ignore();
-
-    inCanGiua("Nhap Khoa hoc: ", 100);
-    cin.getline(danhSachSinhVien[soLuongHienTai].khoaHoc, DO_DAI_KHOA_HOC_TOI_DA);
-
-    soLuongHienTai++;
-    inCanGiua("Them sinh vien thanh cong!", 100);
-}
-
-void xemTatCaSinhVien() {
-    if (soLuongHienTai == 0) {
-        inCanGiua("Chua co du lieu sinh vien.", 100);
-        return;
-    }
-    inCanGiua("MSV\tHo Ten\t\tTuoi\tKhoa Hoc", 100);
-    inCanGiua("-------------------------------------------", 100);
-    for (int i = 0; i < soLuongHienTai; i++) {
-        cout << setw(25) << setfill(' ') << danhSachSinhVien[i].maSo << "\t"
-             << setw(25) << setfill(' ') << danhSachSinhVien[i].hoTen << "\t\t"
-             << setw(25) << setfill(' ') << danhSachSinhVien[i].tuoi << "\t"
-             << setw(25) << setfill(' ') << danhSachSinhVien[i].khoaHoc << endl;
+    cout << "\n" << setfill('=') << setw(70) << "" << endl;
+    cout << left << setw(15) << "MSV" << " | " << setw(25) << "Ho Ten" << " | " << setw(5) << "Tuoi" << " | " << setw(15) << "Khoa Hoc" << endl;
+    cout << setfill('-') << setw(70) << "" << setfill(' ') << endl;
+    for (const auto& sv : danhSach) {
+        sv->hienThi();
     }
 }
 
-void timKiemTheoMaSo() {
-    int maSo;
-    inCanGiua("Nhap MSV can tim: ", 100);
-    cin >> maSo;
-    for (int i = 0; i < soLuongHienTai; i++) {
-        if (danhSachSinhVien[i].maSo == maSo) {
-            cout << "Tim thay: MSV: " << danhSachSinhVien[i].maSo << ", Ten: " << danhSachSinhVien[i].hoTen
-                 << ", Tuoi: " << danhSachSinhVien[i].tuoi << ", Khoa hoc: " << danhSachSinhVien[i].khoaHoc << endl;
-            return;
+void timKiemMaSo(const vector<SinhVien*>& danhSach) {
+    string ms;
+    cout << "Nhap Ma So SV can tim: ";
+    getline(cin, ms);
+    bool timThay = false;
+    for (const auto& sv : danhSach) {
+        if (sv->getMaSo() == ms) {
+            sv->hienThi();
+            timThay = true;
         }
     }
-    inCanGiua("Khong tim thay sinh vien.", 100);
+    if (!timThay) cout << "=> Khong tim thay sinh vien co MSV: " << ms << endl;
 }
 
-void timKiemTheoTen() {
-    char tenCanTim[DO_DAI_TEN_TOI_DA];
-    inCanGiua("Nhap Ten can tim: ", 50);
-    cin.ignore();
-    cin.getline(tenCanTim, DO_DAI_TEN_TOI_DA);
-    for (int i = 0; i < soLuongHienTai; i++) {
-        if (strcmp(danhSachSinhVien[i].hoTen, tenCanTim) == 0) {
-            cout << "Tim thay: MSV: " << danhSachSinhVien[i].maSo << ", Ten: " << danhSachSinhVien[i].hoTen
-                 << ", Tuoi: " << danhSachSinhVien[i].tuoi << ", Khoa hoc: " << danhSachSinhVien[i].khoaHoc << endl;
-            return;
+void timKiemTen(const vector<SinhVien*>& danhSach) {
+    string ten;
+    cout << "Nhap Ten can tim: ";
+    getline(cin, ten);
+    bool timThay = false;
+    for (const auto& sv : danhSach) {
+        if (sv->getHoTen().find(ten) != string::npos) {
+            sv->hienThi();
+            timThay = true;
         }
     }
-    inCanGiua("Khong tim thay sinh vien.", 100);
-}
-
-void xoaSinhVien() {
-    int maSo;
-    inCanGiua("Nhap MSV can xoa: ", 100);
-    cin >> maSo;
-    for (int i = 0; i < soLuongHienTai; i++) {
-        if (danhSachSinhVien[i].maSo == maSo) {
-            inCanGiua("Ban co chac muon xoa? (y/n): ", 100);
-            char xacNhan;
-            cin >> xacNhan;
-            if (xacNhan == 'y' || xacNhan == 'Y') {
-                for (int j = i; j < soLuongHienTai - 1; j++) {
-                    danhSachSinhVien[j] = danhSachSinhVien[j + 1];
-                }
-                soLuongHienTai--;
-                inCanGiua("Xoa thanh cong.", 100);
-            } else {
-                inCanGiua("Da huy xoa.", 100);
-            }
-            return;
-        }
-    }
-    inCanGiua("Khong tim thay MSV.", 100);
-}
-
-void capNhatSinhVien() {
-    int maSo;
-    inCanGiua("Nhap MSV can cap nhat: ", 100);
-    cin >> maSo;
-    for (int i = 0; i < soLuongHienTai; i++) {
-        if (danhSachSinhVien[i].maSo == maSo) {
-            cin.ignore();
-            inCanGiua("Nhap Ten moi: ", 100);
-            cin.getline(danhSachSinhVien[i].hoTen, DO_DAI_TEN_TOI_DA);
-            inCanGiua("Nhap Tuoi moi: ", 100);
-            cin >> danhSachSinhVien[i].tuoi;
-            cin.ignore();
-            inCanGiua("Nhap Khoa hoc moi: ", 100);
-            cin.getline(danhSachSinhVien[i].khoaHoc, DO_DAI_KHOA_HOC_TOI_DA);
-            inCanGiua("Cap nhat thanh cong!", 100);
-            return;
-        }
-    }
-    inCanGiua("Khong tim thay MSV.", 100);
-}
-
-void sapXepTheoTen() {
-    for (int i = 0; i < soLuongHienTai - 1; i++) {
-        for (int j = 0; j < soLuongHienTai - i - 1; j++) {
-            if (strcmp(danhSachSinhVien[j].hoTen, danhSachSinhVien[j + 1].hoTen) > 0) {
-                SinhVien tam = danhSachSinhVien[j];
-                danhSachSinhVien[j] = danhSachSinhVien[j + 1];
-                danhSachSinhVien[j + 1] = tam;
-            }
-        }
-    }
-    inCanGiua("Da sap xep danh sach theo ten.", 100);
-}
-
-void thongKe() {
-    if (soLuongHienTai == 0) {
-        inCanGiua("Khong co du lieu de thong ke.", 100);
-        return;
-    }
-    int tongTuoi = 0;
-    for (int i = 0; i < soLuongHienTai; i++) {
-        tongTuoi += danhSachSinhVien[i].tuoi;
-    }
-    cout << "Tong so sinh vien: " << soLuongHienTai << endl;
-    cout << "Tuoi trung binh: " << (float)tongTuoi / soLuongHienTai << endl;
+    if (!timThay) cout << "=> Khong tim thay sinh vien co ten: " << ten << endl;
 }
 
 int main() {
+    vector<SinhVien*> danhSach;
     int luaChon;
+
     do {
-        inCanGiua("-------- HE THONG QUAN LY SINH VIEN --------", 100);
-        inCanGiua("1. Them sinh vien", 100);
-        inCanGiua("2. Xem tat ca sinh vien", 100);
-        inCanGiua("3. Tim kiem theo MSV", 100);
-        inCanGiua("4. Tim kiem theo Ten", 100);
-        inCanGiua("5. Xoa sinh vien", 100);
-        inCanGiua("6. Cap nhat sinh vien", 100);
-        inCanGiua("7. Sap xep theo ten", 100);
-        inCanGiua("8. Thong ke", 100);
-        inCanGiua("9. Thoat", 100);
-        inCanGiua("--------------------------------------------", 100);
-        inCanGiua("Chon chuc nang: ", 100);
+        cout << "\n========= MENU QUAN LY SINH VIEN =========" << endl;
+        cout << "1. Them sinh vien" << endl;
+        cout << "2. Hien thi danh sach" << endl;
+        cout << "3. Tim kiem theo Ma So" << endl;
+        cout << "4. Tim kiem theo Ten" << endl;
+        cout << "0. Thoat" << endl;
+        cout << "Chon chuc nang: ";
         cin >> luaChon;
+        cin.ignore();
 
         switch (luaChon) {
-            case 1: themSinhVien(); break;
-            case 2: xemTatCaSinhVien(); break;
-            case 3: timKiemTheoMaSo(); break;
-            case 4: timKiemTheoTen(); break;
-            case 5: xoaSinhVien(); break;
-            case 6: capNhatSinhVien(); break;
-            case 7: sapXepTheoTen(); break;
-            case 8: thongKe(); break;
-            case 9: inCanGiua("Tam biet!", 50); break;
-            default: inCanGiua("Lua chon khong hop le!", 50);
+            case 1: themMoi(danhSach); break;
+            case 2: hienThiTatCa(danhSach); break;
+            case 3: timKiemMaSo(danhSach); break;
+            case 4: timKiemTen(danhSach); break;
         }
-    } while (luaChon != 9);
+    } while (luaChon != 0);
+
+    for (auto sv : danhSach) delete sv;
+
     return 0;
 }
